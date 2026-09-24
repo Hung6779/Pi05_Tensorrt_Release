@@ -202,7 +202,11 @@ class PI0Pytorch(nn.Module):
 
             img_emb = self._apply_checkpoint(image_embed_func, img)
 
-            bsize, num_img_embs = img_emb.shape[:2]
+            # Cast to plain Python ints so ONNX export bakes these as constants instead of
+            # tracing them as dynamic Shape-derived values, which can end up structurally
+            # distinct from the equal-valued lengths used below to build att_masks, causing
+            # TensorRT to reject the resulting attention-mask broadcast as non-conformable.
+            bsize, num_img_embs = (int(d) for d in img_emb.shape[:2])
 
             embs.append(img_emb)
             pad_masks.append(img_mask[:, None].expand(bsize, num_img_embs))
@@ -222,7 +226,7 @@ class PI0Pytorch(nn.Module):
         pad_masks.append(lang_masks)
 
         # full attention between image and language inputs
-        num_lang_embs = lang_emb.shape[1]
+        num_lang_embs = int(lang_emb.shape[1])
         att_masks += [0] * num_lang_embs
 
         embs = torch.cat(embs, dim=1)
@@ -230,7 +234,7 @@ class PI0Pytorch(nn.Module):
         att_masks = torch.tensor(att_masks, dtype=torch.bool, device=pad_masks.device)
 
         # Get batch size from the first dimension of the concatenated tensors
-        bsize = pad_masks.shape[0]
+        bsize = int(pad_masks.shape[0])
         att_masks = att_masks[None, :].expand(bsize, len(att_masks))
 
         return embs, pad_masks, att_masks
@@ -252,7 +256,7 @@ class PI0Pytorch(nn.Module):
             state_emb = self._apply_checkpoint(state_proj_func, state)
 
             embs.append(state_emb[:, None, :])
-            bsize = state_emb.shape[0]
+            bsize = int(state_emb.shape[0])
             device = state_emb.device
 
             state_mask = torch.ones(bsize, 1, dtype=torch.bool, device=device)
@@ -300,7 +304,7 @@ class PI0Pytorch(nn.Module):
         # Add to input tokens
         embs.append(action_time_emb)
 
-        bsize, action_time_dim = action_time_emb.shape[:2]
+        bsize, action_time_dim = (int(d) for d in action_time_emb.shape[:2])
         action_time_mask = torch.ones(bsize, action_time_dim, dtype=torch.bool, device=timestep.device)
         pad_masks.append(action_time_mask)
 

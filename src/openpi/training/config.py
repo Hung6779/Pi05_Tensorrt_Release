@@ -556,6 +556,10 @@ class TrainConfig:
             raise ValueError("Cannot resume and overwrite at the same time.")
 
 
+# Imported here (not at module top) because it subclasses DataConfigFactory,
+# defined above in this same module -- a top-level import would circular-import.
+import openpi.training.misc.ur10e_cup_config as ur10e_cup_config  # noqa: E402
+
 # Use `get_config` if you need to get a config by name in your code.
 _CONFIGS = [
     #
@@ -968,6 +972,7 @@ _CONFIGS = [
     # RoboArena & PolaRiS configs.
     *roboarena_config.get_roboarena_configs(),
     *polaris_config.get_polaris_configs(),
+    *ur10e_cup_config.get_ur10e_cup_configs(),
 ]
 
 if len({config.name for config in _CONFIGS}) != len(_CONFIGS):

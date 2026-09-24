@@ -104,7 +104,10 @@ class GemmaRMSNorm(nn.Module):
         return normed_inputs.to(dtype), gate.to(dtype)
 
     def extra_repr(self):
-        repr_str = f"{tuple(self.weight.shape)}, eps={self.eps}"
+        if hasattr(self, 'weight') and self.weight is not None:
+            repr_str = f"{tuple(self.weight.shape)}, eps={self.eps}"
+        else:
+            repr_str = f"eps={self.eps}"
         if self.dense is not None:
             repr_str += f", adaptive=True, cond_dim={self.cond_dim}"
         return repr_str
@@ -324,7 +327,7 @@ class GemmaAttention(nn.Module):
             **kwargs,
         )
 
-        attn_output = attn_output.reshape(*input_shape, -1).contiguous()
+        attn_output = attn_output.reshape(*input_shape, self.config.num_attention_heads * self.head_dim).contiguous()
         attn_output = self.o_proj(attn_output)
         return attn_output, attn_weights
 
