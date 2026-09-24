@@ -255,7 +255,7 @@ python deployment_scripts/pytorch_to_onnx.py \
   --checkpoint_dir /home/hung/.cache/openpi/openpi-assets/checkpoints/pi05_libero_pytorch \
   --output_path /home/hung/.cache/openpi/openpi-assets/checkpoints/pi05_libero_pytorch \
   --config_name pi05_libero \
-  --precision fp16
+  --precision fp16 --no-perf_opts
 ```
 
 This generates the FP16 ONNX model.
@@ -422,7 +422,7 @@ python deployment_scripts/pytorch_to_onnx.py \
   --checkpoint_dir /home/hung/.cache/openpi/openpi-assets/checkpoints/pi05_libero_pytorch \
   --output_path /home/hung/.cache/openpi/openpi-assets/checkpoints/pi05_libero_pytorch \
   --config_name pi05_libero \
-  --precision fp16
+  --precision fp16 --no-perf_opts
 ```
 
 ### PyTorch → ONNX FP8
